@@ -314,6 +314,7 @@ impl Drop for RtcPeerConnectionEventHandlers {
     fn drop(&mut self) {
         self.handle.set_onicecandidate(None);
         self.handle.set_ondatachannel(None);
+        js_sys::Reflect::set(&self.handle, &js_sys::JsString::from("onconnectionstatechange"), &wasm_bindgen::JsValue::UNDEFINED).unwrap();
     }
 }
 
@@ -328,6 +329,7 @@ pub struct RtcDataChannel {
 impl RtcDataChannel {
     fn new(handle: web_sys::RtcDataChannel) -> Self {
         handle.set_binary_type(web_sys::RtcDataChannelType::Arraybuffer);
+        handle.set_onopen(None);
         let label = handle.label();
         let (message_send, message_recv) = mpsc::unbounded();
         let message_recv = RefCell::new(message_recv);
