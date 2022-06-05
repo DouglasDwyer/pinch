@@ -1,12 +1,9 @@
 use crate::*;
 
-use datachannel::DataChannelInit;
-use futures::*;
 use futures::channel::*;
 use std::sync::Arc;
 use std::cell::*;
 use std::collections::*;
-use std::task::*;
 
 pub struct RtcPeerConnector {
     handle: Arc<RefCell<Box<datachannel::RtcPeerConnection<RtcPeerConnectionEventHandlers>>>>,
@@ -359,34 +356,6 @@ impl datachannel::DataChannelHandler for RtcDataChannelEventHandlers {
     fn on_available(&mut self) {}
 }
 
-
-pub struct PollFuture {
-    count: u32
-}
-
-impl PollFuture {
-    pub fn new(count: u32) -> PollFuture {
-        PollFuture { count }
-    }
-
-    pub fn once() -> PollFuture {
-        PollFuture::new(1)
-    }
-}
-
-impl Future for PollFuture {
-    type Output = ();
-
-    fn poll(self: std::pin::Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
-        if self.count > 0 {
-            self.get_mut().count -= 1;
-            return Poll::Pending;
-        }
-
-        Poll::Ready(())
-    }
-}
-
 impl From<datachannel::SessionDescription> for RtcNegotiationMessage {
     fn from(x: datachannel::SessionDescription) -> Self {
         Self::RemoteSessionDescription(RtcSessionDescription {
@@ -461,7 +430,7 @@ impl From<RtcIceTransportPolicy> for datachannel::TransportPolicy {
     }
 }
 
-impl From<&RtcDataChannelConfiguration> for DataChannelInit {
+impl From<&RtcDataChannelConfiguration> for datachannel::DataChannelInit {
     fn from(x: &RtcDataChannelConfiguration) -> Self {
         let mut ret = Self::default()
             .protocol(x.protocol.as_ref().map(|x| x.clone()).unwrap_or("".to_string()).as_str())

@@ -1,12 +1,10 @@
 use crate::*;
 
-use futures::*;
 use futures::channel::*;
 use futures::channel::mpsc::UnboundedSender;
 use std::cell::*;
 use std::collections::*;
 use std::rc::*;
-use std::task::*;
 use wasm_bindgen::*;
 use wasm_bindgen::closure::*;
 use wasm_bindgen_futures::*;
@@ -529,32 +527,5 @@ impl From<&RtcDataChannelConfiguration> for web_sys::RtcDataChannelInit {
         if let Some(i) = x.id { ret.id(i); }
 
         ret
-    }
-}
-
-pub struct PollFuture {
-    count: u32
-}
-
-impl PollFuture {
-    pub fn new(count: u32) -> PollFuture {
-        PollFuture { count }
-    }
-
-    pub fn once() -> PollFuture {
-        PollFuture::new(1)
-    }
-}
-
-impl Future for PollFuture {
-    type Output = ();
-
-    fn poll(self: std::pin::Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
-        if self.count > 0 {
-            self.get_mut().count -= 1;
-            return Poll::Pending;
-        }
-
-        Poll::Ready(())
     }
 }

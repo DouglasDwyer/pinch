@@ -2,7 +2,9 @@
 
 mod backend;
 
+use futures::*;
 use serde::*;
+use std::task::*;
 use thiserror::*;
 
 #[derive(Clone)]
@@ -236,4 +238,33 @@ pub enum RtcDataChannelReadyState {
     Open,
     Closing,
     Closed
+}
+
+struct PollFuture {
+    count: u32
+}
+
+impl PollFuture {
+    pub fn new(count: u32) -> PollFuture {
+        PollFuture { count }
+    }
+
+    pub fn once() -> PollFuture {
+        PollFuture::new(1)
+    }
+}
+
+impl Future for PollFuture {
+    type Output = ();
+
+    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        if self.count > 0 {
+            self.get_mut().count -= 1;
+            cx.waker().wake_by_ref();
+            Poll::Pending
+        }
+        else {
+            Poll::Ready(())
+        }
+    }
 }
