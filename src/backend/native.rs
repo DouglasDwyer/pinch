@@ -232,6 +232,9 @@ pub struct RtcDataChannel {
     _peer_connection: Arc<RefCell<Box<datachannel::RtcPeerConnection<RtcPeerConnectionEventHandlers>>>>
 }
 
+unsafe impl Send for RtcDataChannel {}
+unsafe impl Sync for RtcDataChannel {}
+
 impl RtcDataChannel {
     fn new(handle: Box<datachannel::RtcDataChannel<RtcDataChannelEventHandlers>>, message_recv: mpsc::UnboundedReceiver<Result<Vec<u8>, RtcDataChannelError>>, _peer_connection: Arc<RefCell<Box<datachannel::RtcPeerConnection<RtcPeerConnectionEventHandlers>>>>) -> Self {
         let label = handle.label();
